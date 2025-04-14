@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import TaskComponent from "@/components/task";
 
 export default function InputField() {
 
@@ -29,7 +30,7 @@ export default function InputField() {
             <ul>
                 {
                     tasksList.map((task: string, index: number) => (
-                        <li key={index}>{task}</li>
+                        <TaskComponent task={task} key={index} />
                     ))
                 }
             </ul>
