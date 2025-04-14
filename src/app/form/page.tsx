@@ -1,10 +1,9 @@
-
 import InputField from "@/components/inputField";
 
-export default function MyApp() {
+export default function Form() {
     return (
         <div>
-            <h1>To Do App</h1>
+            <h1>Form</h1>
             <InputField />
         </div>
     );
