@@ -12,13 +12,14 @@ interface TaskCompnentType {
 
 export default function TaskComponent(props: TaskCompnentType) {
 
-    const { task, arrayIndex, deleteTask } = props;
+    const { task, arrayIndex, deleteTask, updateTask } = props;
     const [showInput, setShowInput] = useState<boolean>(false);
-    const [editValue, setEditValue] = useState(task);
+    const [editValue, setEditValue] = useState<string>(task);
 
-    const handleUpdate = () => {
+    const updateChanges = () => {
         updateTask(arrayIndex, editValue);
         setShowInput(false);
+        console.log(arrayIndex, editValue);
     };
 
     return (
@@ -33,7 +34,7 @@ export default function TaskComponent(props: TaskCompnentType) {
                 placeholder="Enter your text here"
                 onChange={(e) => setEditValue(e.target.value)}
                 />
-                <button onClick = {handleUpdate}> Submit </button>
+                <button onClick = {updateChanges}> Submit </button>
                 <span onClick = {() => setShowInput(false)}><CloseIcon/></span>
             </> : <span onClick = {() => setShowInput(true)}><EditIcon/></span>} &nbsp;
 
