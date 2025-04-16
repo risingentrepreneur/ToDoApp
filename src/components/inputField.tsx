@@ -5,7 +5,6 @@ import TaskComponent from "@/components/task";
 
 export default function InputField() {
 
-    const headline = "This Task";
     const [tasksList, setTasksList] = useState<string[]>([]);
     const [inputData, setInputData] = useState("");
 
@@ -15,14 +14,26 @@ export default function InputField() {
         setInputData("");
     }
 
+    const deleteTask = (arrayIndex : number) => {
+        const newArray = tasksList.filter((task:string, index:number) => (
+            index != arrayIndex
+        ))
+        setTasksList(newArray);
+    }
+    
+    const updateTask = (index:number, newTask:string) => {
+        const updatedTasks = [...tasksList];
+        updatedTasks[index] = newTask;
+        setTasksList(updatedTasks);
+    }
+
     return (
         <div>
-            {headline}
             <form onSubmit={addTask}>
                 <input
                     type="text"
                     value={inputData}
-                    placeholder="Enter your txt here"
+                    placeholder="Enter your text here"
                     onChange={(e) => setInputData(e.target.value)}
                 />
                 <button type="submit">Add Task</button>
@@ -30,7 +41,7 @@ export default function InputField() {
             <ul>
                 {
                     tasksList.map((task: string, index: number) => (
-                        <TaskComponent task={task} key={index} />
+                        <TaskComponent task={task} key={index} arrayIndex={index} deleteTask={deleteTask} updateTask={updateTask}/>
                     ))
                 }
             </ul>
