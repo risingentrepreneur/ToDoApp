@@ -1,8 +1,19 @@
-export default function TaskComponent(props : {task : string}){
+import { DeleteIcon } from "./icons";
 
-    const { task } = props;
+interface TaskComponentType {
+    task : string, 
+    arrayIndex : number, 
+    deleteTask : (arrayIndex : number) => void
+}
 
+export default function TaskComponent(props : TaskComponentType){
+
+    const { task, arrayIndex, deleteTask } = props;
+    
     return (
-        <li>{task}</li>
+        <li>
+            {task}
+            <span onClick={() => deleteTask(arrayIndex)}><DeleteIcon /></span>
+        </li>
     )
 }

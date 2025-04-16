@@ -42,4 +42,4 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 
 ## Installed SCSS (SASS) in NextJS
-- Run command `npm i sass` and start using `.scss` file extension for styling
+- Run command `npm i sass` and start using `.scss` file extension for styling.
