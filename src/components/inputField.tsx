@@ -1,56 +1,297 @@
-"use client"
+"use client";
 
 import { useState } from "react";
-import TaskComponent from "@/components/task";
+import TaskWithHeadline from "./taskWithHeadline";
 
-export default function InputField() {
-    const [tasksList, setTasksList] = useState<string[]>([]);
-    const [inputData, setInputData] = useState(""); 
 
-    const addTask = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault(); //prevents page reload
-        if (!inputData.trim()) return;
-        setTasksList(prev => [...prev, inputData.trim()]);
-        setInputData(""); // clear the input field after adding the task....
+interface TaskObj {
+    [key: string]: string[];
+}
+
+ export default function InputField() {
+    
+    const [tasksList, setTasksList] = useState<TaskObj[]>([]);
+    const [inputHeadline, setInputHeadline] = useState<string>("");
+    
+    const addHeadline = (e:React.FormEvent<HTMLFormElement>) =>{
+        e.preventDefault(); //if (!inputHeadline.trim()) return;
+        setTasksList(prev => [...prev,{[inputHeadline]:[]}]);
+        setInputHeadline(""); 
+    }
+    
+    const deleteHeadline=(indexToRenmove:number)=>{
+        setTasksList(prev => prev.filter((_,index) =>index!==indexToRenmove));
+    };
+    // const deleteHeadline = (indexToRemove: number) => {
+    //     setTasksList(prev => prev.filter((_, index) => index !== indexToRemove));
+    // }; 
+   
+    const addTaskToHeadline = ( headline: string, task: string ) => {
+        setTasksList( prev => (
+                prev.map( taskWithHeadline => taskWithHeadline[headline] 
+                    ? { [headline]: [...taskWithHeadline[headline], task] } 
+                    : taskWithHeadline 
+                    
+                )
+            )
+        )
     };
 
-    const deleteTask = (arrayindex: number) => {
-        const updatedList = tasksList.filter((_, i) => i !== arrayindex);
-        setTasksList(updatedList);
+    const deleteTask = (headline: string, taskIndex: number) => {
+        setTasksList(prev => prev.map(taskWithHeadline => {
+                if (taskWithHeadline[headline]) {
+                    const updatedTasks = taskWithHeadline[headline].filter((_, index1) => index1 !== taskIndex);
+                    return { [headline]: updatedTasks };
+                } return taskWithHeadline;
+            })
+        )
     };
 
-    const updateTask = (index: number, newTask: string) => {
-        const updatedList = tasksList.map((task, i) =>
-            i === index ? newTask : task
+    const updateHeadline = (index: number, newHeadline: string) => {
+        setTasksList(prev =>
+            prev.map((item, index1) => {
+                if (index1 === index) {
+                    const oldHeadline = Object.keys(item)[0];
+                    const tasks = item[oldHeadline];
+                    return { [newHeadline]: tasks };
+                }
+                return item;
+            })
         );
-        setTasksList(updatedList);
+    };
+
+    const updateTask = (headline: string, taskIndex: number, newText: string) => {
+        setTasksList(prev =>
+            prev.map(taskWithHeadline => {
+                if (taskWithHeadline[headline]) {
+                    const updatedTasks = [...taskWithHeadline[headline]];
+                    updatedTasks[taskIndex] = newText;
+                    return { [headline]: updatedTasks };
+                }
+                return taskWithHeadline;
+            })
+        );
     };
 
     return (
         <div>
-            <form onSubmit={addTask}>
+            {tasksList.map((taskWithHeadline, index) => (
+                <ul key={index}>
+                    {Object.entries(taskWithHeadline).map(([key, tasks]) => (
+                        <TaskWithHeadline
+                            key={key}
+                            headline={key}
+                            tasks={tasks}
+                            headlineIndex={index}
+                            addTaskToHeadline={addTaskToHeadline}
+                            deleteHeadline={deleteHeadline}
+                            deleteTask={deleteTask}
+                            updateHeadline={updateHeadline}
+                            updateTask={updateTask}
+                        />
+                    ))}
+                </ul>
+            ))}
+
+            <form onSubmit={addHeadline}>
                 <input
                     type="text"
-                    value={inputData}
-                    onChange={(e) => setInputData(e.target.value)}
-                    placeholder="Enter your task"
+                    value={inputHeadline}
+                    placeholder="Enter headline here"
+                    onChange={(e) => setInputHeadline(e.target.value)}
                 />
-                <button type="submit">Add Task</button>
-                
-
+                <button type="submit">Add Headline</button>
             </form>
-
-            <ul>
-                {tasksList.map((task, index) => (
-                    <TaskComponent
-                        key={index}
-                        task={task}
-                        arrayIndex={index}
-                        deleteTask={deleteTask}
-                        updateTask={updateTask}
-                    />   //how: The list is rendered by mapping tasks into TaskComponent. //why: Promotes reusable, readable, and modular code by splitting UI logic into separate components.
-                ))}
-            </ul>
         </div>
     );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// "use client";
+
+// import { useState } from "react";
+// import TaskWithHeadline from "./taskWithHeadline";
+
+// interface TaskObj {
+//     [key: string]: string[];
+// }
+
+// export default function InputField() {
+//     const [tasksList, setTasksList] = useState<TaskObj[]>([]);
+//     const [inputHeadline, setInputHeadline] = useState<string>("");
+
+//     const addHeadline = (e: React.FormEvent<HTMLFormElement>) => {
+//         e.preventDefault();
+//         if (!inputHeadline.trim()) return;
+//         setTasksList(prev => [...prev, { [inputHeadline.trim()]: [] }]);
+//         setInputHeadline("");
+//     };
+
+//     const addTaskToHeadline = (headline: string, task: string) => {
+//         setTasksList(prev =>
+//             prev.map(taskWithHeadline =>
+//                 taskWithHeadline[headline]
+//                     ? { [headline]: [...taskWithHeadline[headline], task] }
+//                     : taskWithHeadline
+//             )
+//         );
+//     };
+
+//     const deleteHeadline = (indexToRemove: number) => {
+//         setTasksList(prev => prev.filter((_, index) => index !== indexToRemove));
+//     };
+
+//     const deleteTask = (headline: string, taskIndex: number) => {
+//         setTasksList(prev =>
+//             prev.map(taskWithHeadline => {
+//                 if (taskWithHeadline[headline]) {
+//                     const updatedTasks = taskWithHeadline[headline].filter((_, i) => i !== taskIndex);
+//                     return { [headline]: updatedTasks };
+//                 }
+//                 return taskWithHeadline;
+//             })
+//         );
+//     };
+
+//     return (
+//         <div>
+//             {tasksList.map((taskWithHeadline, index) => (
+//                 <ul key={index}>
+//                     {Object.entries(taskWithHeadline).map(([key, tasks]) => (
+//                         <TaskWithHeadline
+//                             key={key}
+//                             headline={key}
+//                             tasks={tasks}
+//                             headlineIndex={index}
+//                             addTaskToHeadline={addTaskToHeadline}
+//                             deleteHeadline={deleteHeadline}
+//                             deleteTask={deleteTask}
+//                         />
+//                     ))}
+//                 </ul>
+//             ))}
+
+//             <form onSubmit={addHeadline}>
+//                 <input
+//                     type="text"
+//                     value={inputHeadline}
+//                     placeholder="Enter headline here"
+//                     onChange={(e) => setInputHeadline(e.target.value)}
+//                 />
+//                 <button type="submit">Add Headline</button>
+//             </form>
+//         </div>
+//     );
+// }
+
+
+
+
+
+
+
+// "use client"
+
+// import { useState } from "react";
+// import TaskWithHeadline from "./taskWithHeadline";
+
+// interface TaskObj {
+//     [key: string]: string[],
+// }
+
+// export default function InputField() {
+
+//     const [tasksList, setTasksList] = useState<TaskObj[]>([]);
+//     const [inputHeadline, setInputHeadline] = useState<string>("");
+
+//     const addHeadline = (e: React.FormEvent<HTMLFormElement>) => {
+//         e.preventDefault();
+//         setTasksList(prev => [...prev, { [inputHeadline]: [] }])
+//         setInputHeadline("");
+//     }
+
+//     const addTaskToHeadline = (headline : string, task : string) => {
+
+//         setTasksList(
+//             prev => prev.map((taskWithHeadline : TaskObj) => {
+//                 if (taskWithHeadline[headline]){
+//                     return {
+//                         [headline] : [...taskWithHeadline[headline], task]
+//                     }
+//                 }
+//                 return taskWithHeadline;
+//             })
+//         );
+
+//     }
+
+//     return (
+//         <div>
+//             {
+//                 tasksList.map((taskWithHeadline: TaskObj, index: number) => (
+//                     <ul key={index}>
+//                         {
+//                             Object.entries(taskWithHeadline).map(([key, tasks], index: number) => (
+
+//                                 <TaskWithHeadline 
+//                                     headline={key} 
+//                                     tasks={tasks} 
+//                                     key={index} 
+//                                     addTaskToHeadline={addTaskToHeadline} 
+//                                 />
+
+//                             ))
+//                         }
+//                     </ul>
+//                 ))
+//             }
+
+//             <form onSubmit={addHeadline}>
+//                 <input
+//                     type="text"
+//                     value={inputHeadline}
+//                     placeholder="Enter healine here"
+//                     onChange={(e) => setInputHeadline(e.target.value)}
+//                 />
+//                 <button type="submit">Add Headline</button>&nbsp;&nbsp;&nbsp;
+//             </form>
+//         </div>
+//     );
+// }
+
+
+
+
+
+
