@@ -2,13 +2,10 @@
 
 import { useState } from "react";
 import TaskWithHeadline from "./taskWithHeadline";
+import { TaskObj } from "@/interfaces/taskObject";
 
 
-interface TaskObj {
-    [key: string]: string[];
-}
-
- export default function InputField() {
+export default function InputField() {
     
     const [tasksList, setTasksList] = useState<TaskObj[]>([]);
     const [inputHeadline, setInputHeadline] = useState<string>("");
@@ -94,6 +91,7 @@ interface TaskObj {
                             deleteTask={deleteTask}
                             updateHeadline={updateHeadline}
                             updateTask={updateTask}
+                            setTasksList={setTasksList}
                         />
                     ))}
                 </ul>

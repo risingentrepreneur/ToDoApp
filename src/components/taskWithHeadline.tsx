@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { AddIcon, DeleteIcon,CloseIcon,EditIcon } from "./icons"; 
+import { TaskObj } from "@/interfaces/taskObject";
 
-
+  // props interface 
 interface TaskWithHeadlineObj {
     headline: string;
     tasks: string[];
@@ -11,10 +12,11 @@ interface TaskWithHeadlineObj {
     deleteTask: (headline: string, taskIndex: number) => void;
     updateHeadline: (index: number, newHeadline: string) => void;
     updateTask: (headline: string, taskIndex: number, updatedText: string) => void;
-}  // props interface 
+    setTasksList : React.Dispatch<React.SetStateAction<TaskObj[]>>
+}
 
 export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // component definition 
-    const {headline,tasks,headlineIndex,addTaskToHeadline,deleteHeadline,deleteTask,updateHeadline,updateTask,} = props; // destructuring props
+    const {headline,tasks,headlineIndex,addTaskToHeadline,deleteHeadline,deleteTask,updateHeadline,updateTask, setTasksList} = props; // destructuring props
 
 
     const [taskInput, setTaskInput] = useState<string>("");
