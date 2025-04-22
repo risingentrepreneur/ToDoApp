@@ -1,50 +1,63 @@
 "use client"
 
 import { useState } from "react";
-import TaskComponent from "@/components/task";
+import TaskTitle from "./taskTitle";
+
+interface TaskObj {
+    [key:string]: string[],
+}
 
 export default function InputField() {
+    const [tasksList, setTasksList] = useState<TaskObj[]>([]);
+    const [inputTitle, setInputTitle] = useState<string>("");
 
-    const [tasksList, setTasksList] = useState<string[]>([]);
-    const [inputData, setInputData] = useState("");
-
-    const addTask = (e : React.FormEvent<HTMLFormElement>) => {
+    const addTitle = (e : React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setTasksList((prev) => [...prev, inputData]);
-        setInputData("");
+        setTasksList((prev) => [...prev, {[inputTitle]:[]}]);
+        setInputTitle("");
     }
 
-    const deleteTask = (arrayIndex : number) => {
-        const newArray = tasksList.filter((task:string, index:number) => (
-            index != arrayIndex
-        ))
-        setTasksList(newArray);
-    }
-    
-    const updateTask = (index:number, newTask:string) => {
-        const updatedTasks = [...tasksList];
-        updatedTasks[index] = newTask;
-        setTasksList(updatedTasks);
+    const addTaskToTitle = (title : string, task : string) => {
+
+        setTasksList(
+            prev => prev.map((taskTitle : TaskObj) => {
+                if (taskTitle[title]){
+                    return {
+                        [title] : [...taskTitle[title], task]
+                    }
+                }
+                return taskTitle;
+            })
+        );
     }
 
     return (
         <div>
-            <form onSubmit={addTask}>
+            {
+                tasksList.map((taskWithTitle: TaskObj, index: number) => (
+                    <ul key={index}>
+                        {
+                            Object.entries(taskWithTitle).map(([key,tasks], index: number) => (
+
+                                <TaskTitle
+                                    title={key}
+                                    tasks={tasks}
+                                    key={index}
+                                    addTaskToTitle={addTaskToTitle}/>
+                            ))
+                        }
+                    </ul>
+                ))
+            } 
+            <form onSubmit={addTitle}>
                 <input
                     type="text"
-                    value={inputData}
-                    placeholder="Enter your text here"
-                    onChange={(e) => setInputData(e.target.value)}
+                    value={inputTitle}
+                    placeholder="Enter your title here"
+                    onChange={(e) => setInputTitle(e.target.value)}
                 />
-                <button type="submit">Add Task</button>
+                <button type="submit">Add Title</button>
             </form>
-            <ul>
-                {
-                    tasksList.map((task: string, index: number) => (
-                        <TaskComponent task={task} key={index} arrayIndex={index} deleteTask={deleteTask} updateTask={updateTask}/>
-                    ))
-                }
-            </ul>
         </div>
     );
 }

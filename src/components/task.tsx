@@ -7,41 +7,29 @@ interface TaskCompnentType {
     task: string,
     arrayIndex: number,
     deleteTask: (arrayIndex: number) => void;
-    updateTask: (index:number, newTask:string) => void;
+    // updateTask: (index:number, newTask:string) => void;
 }
 
 export default function TaskComponent(props: TaskCompnentType) {
 
-    const { task, arrayIndex, deleteTask, updateTask } = props;
+    const { task, arrayIndex, deleteTask } = props;
     const [showInput, setShowInput] = useState<boolean>(false);
-    const [editValue, setEditValue] = useState<string>(task);
-
-    const updateChanges = () => {
-        updateTask(arrayIndex, editValue);
-        setShowInput(false);
-        console.log(arrayIndex, editValue);
-    };
+    // const [editValue, setEditValue] = useState<string>(task);
 
     return (
         <li>
 
             {task} &nbsp;
-            { (showInput == true) ? 
+            { (showInput == true) ?
             <>
-                <input 
-                type = "text"
-                value = {editValue}
-                placeholder="Enter your text here"
-                onChange={(e) => setEditValue(e.target.value)}
-                />
-                <button onClick = {updateChanges}> Submit </button>
+                <input type = "text" />
+                <button> Submit </button>
                 <span onClick = {() => setShowInput(false)}><CloseIcon/></span>
-            </> : <span onClick = {() => setShowInput(true)}><EditIcon/></span>} &nbsp;
-
-            
-            <span onClick = {() => deleteTask(arrayIndex)}><DeleteIcon/></span>
-            
-        </li >
+            </> 
+            : <span onClick = {() => setShowInput(true)}><EditIcon/></span>
+            } &nbsp;
+            <span onClick = {() => deleteTask(arrayIndex)}><DeleteIcon/></span>           
+        </li>
         
     )
 }
