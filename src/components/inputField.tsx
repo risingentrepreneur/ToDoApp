@@ -14,41 +14,6 @@ export default function InputField() {
         setInputTitle("");
     }
 
-    const addTaskToTitle = (title : string, task : string) => {
-        setTasksList((prev) => prev.map((obj) => 
-            obj[title] ? {[title] : [...obj[title], task]} : obj
-            )
-        )
-    }
-
-    const deleteTitle = (title: string) => {
-        setTasksList((prev) => prev.filter(obj => !obj[title]));
-    }
-
-    const editTitle = (title: string, newTitle: string) => {
-        setTasksList(prev => prev.map(obj => 
-            obj[title] ? {[newTitle]: obj[title]}
-            : obj
-        ))
-    }
-
-    const deleteTaskFromTitle = (title: string, index: number) => {
-        setTasksList(prev => prev.map(obj => 
-            obj[title] ? {[title]:obj[title].filter((task:string, taskIndex:number) => 
-                    taskIndex !== index)} : obj
-            )
-        )
-    }
-
-    const editTaskInTitle = (title: string, index:number, newTask: string)=> {
-        setTasksList(prev => prev.map(obj => 
-            obj[title] ? {[title]: obj[title].map((task: string, taskIndex: number) =>
-            (taskIndex === index ? newTask : task))}
-            : obj
-            )
-        )
-    }
-
     return (
         <div>
             {tasksList.map((taskWithTitle: TaskObj, index: number) => (
@@ -58,11 +23,7 @@ export default function InputField() {
                                 title={key}
                                 tasks={tasks}
                                 key={index}
-                                addTaskToTitle={addTaskToTitle}
-                                deleteTitle={deleteTitle}
-                                editTitle={editTitle}
-                                deleteTaskFromTitle={deleteTaskFromTitle}
-                                editTaskInTitle={editTaskInTitle}
+                                setTasksList={setTasksList}
                             />
                         ))}
                     </ul>

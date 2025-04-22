@@ -1,23 +1,55 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { EditIcon, DeleteIcon, AddIcon, CloseIcon } from "./icons";
 import TaskComponent from "./task";
+import { TaskObj } from "@/Interfaces/taskObject";
 
 interface TaskTitleObj {
     title : string;
     tasks : string[];
-    addTaskToTitle: (title: string, task: string) => void;
-    editTitle: (title: string, newTitle: string) => void;
-    deleteTitle: (title: string) => void;
-    deleteTaskFromTitle: (title: string, index: number) => void;
-    editTaskInTitle: (title: string, index: number, newTask: string) => void;
+    setTasksList: React.Dispatch<React.SetStateAction<TaskObj[]>>
 }
 
 export default function TaskTitle (props: TaskTitleObj) {
-    const { title, tasks, addTaskToTitle, editTitle, deleteTitle, deleteTaskFromTitle, editTaskInTitle } = props;
+    const { title, tasks, setTasksList} = props;
     const [taskInput, setTaskInput] = useState<string>("");
     const [showAddTaskInput, setShowAddTaskInput]= useState<boolean>(false);
     const [editTitleInput, setEditTitleInput] = useState<string>(title);
     const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
+
+    const addTaskToTitle = (title : string, task : string) => {
+        setTasksList((prev) => prev.map((obj) => 
+            obj[title] ? {[title] : [...obj[title], task]} : obj
+            )
+        )
+    }
+
+    const deleteTitle = (title: string) => {
+        setTasksList((prev) => prev.filter(obj => !obj[title]));
+    }
+
+    const editTitle = (title: string, newTitle: string) => {
+        setTasksList(prev => prev.map(obj => 
+            obj[title] ? {[newTitle]: obj[title]}
+            : obj
+        ))
+    }
+
+    const deleteTaskFromTitle = (title: string, index: number) => {
+        setTasksList(prev => prev.map(obj => 
+            obj[title] ? {[title]:obj[title].filter((task:string, taskIndex:number) => 
+                    taskIndex !== index)} : obj
+            )
+        )
+    }
+
+    const editTaskInTitle = (title: string, index:number, newTask: string)=> {
+        setTasksList(prev => prev.map(obj => 
+            obj[title] ? {[title]: obj[title].map((task: string, taskIndex: number) =>
+            (taskIndex === index ? newTask : task))}
+            : obj
+            )
+        )
+    }
 
     const addTask = () => {
         addTaskToTitle(title, taskInput);
