@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import TaskTitle from "./taskTitle";
-
-interface TaskObj {
-    [key:string]: string[],
-}
+import {TaskObj} from "@/Interfaces/taskObject"
 
 export default function InputField() {
     const [tasksList, setTasksList] = useState<TaskObj[]>([]);
@@ -18,34 +15,56 @@ export default function InputField() {
     }
 
     const addTaskToTitle = (title : string, task : string) => {
+        setTasksList((prev) => prev.map((obj) => 
+            obj[title] ? {[title] : [...obj[title], task]} : obj
+            )
+        )
+    }
 
-        setTasksList(
-            prev => prev.map((taskTitle : TaskObj) => {
-                if (taskTitle[title]){
-                    return {
-                        [title] : [...taskTitle[title], task]
-                    }
-                }
-                return taskTitle;
-            })
-        );
+    const deleteTitle = (title: string) => {
+        setTasksList((prev) => prev.filter(obj => !obj[title]));
+    }
+
+    const editTitle = (title: string, newTitle: string) => {
+        setTasksList(prev => prev.map(obj => 
+            obj[title] ? {[newTitle]: obj[title]}
+            : obj
+        ))
+    }
+
+    const deleteTaskFromTitle = (title: string, index: number) => {
+        setTasksList(prev => prev.map(obj => 
+            obj[title] ? {[title]:obj[title].filter((task:string, taskIndex:number) => 
+                    taskIndex !== index)} : obj
+            )
+        )
+    }
+
+    const editTaskInTitle = (title: string, index:number, newTask: string)=> {
+        setTasksList(prev => prev.map(obj => 
+            obj[title] ? {[title]: obj[title].map((task: string, taskIndex: number) =>
+            (taskIndex === index ? newTask : task))}
+            : obj
+            )
+        )
     }
 
     return (
         <div>
-            {
-                tasksList.map((taskWithTitle: TaskObj, index: number) => (
+            {tasksList.map((taskWithTitle: TaskObj, index: number) => (
                     <ul key={index}>
-                        {
-                            Object.entries(taskWithTitle).map(([key,tasks], index: number) => (
-
-                                <TaskTitle
-                                    title={key}
-                                    tasks={tasks}
-                                    key={index}
-                                    addTaskToTitle={addTaskToTitle}/>
-                            ))
-                        }
+                        {Object.entries(taskWithTitle).map(([key,tasks], index: number) => (
+                            <TaskTitle
+                                title={key}
+                                tasks={tasks}
+                                key={index}
+                                addTaskToTitle={addTaskToTitle}
+                                deleteTitle={deleteTitle}
+                                editTitle={editTitle}
+                                deleteTaskFromTitle={deleteTaskFromTitle}
+                                editTaskInTitle={editTaskInTitle}
+                            />
+                        ))}
                     </ul>
                 ))
             } 
