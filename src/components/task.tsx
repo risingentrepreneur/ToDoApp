@@ -2,19 +2,13 @@
 
 import { useState } from "react";
 import { DeleteIcon, EditIcon, CloseIcon} from "./icons";
-
-interface TaskCompnentType {
-    task: string,
-    arrayIndex: number,
-    deleteTask: (arrayIndex: number) => void;
-    editTask: (index:number, newTask:string) => void;
-}
+import { TaskItem, TaskCompnentType } from "@/Interfaces/taskObject";
 
 export default function TaskComponent(props: TaskCompnentType) {
 
     const { task, arrayIndex, deleteTask, editTask } = props;
     const [showInput, setShowInput] = useState<boolean>(false);
-    const [editValue, setEditValue] = useState<string>(task);
+    const [editValue, setEditValue] = useState<string>(task.name);
 
     const handleEdit = () => {
         editTask(arrayIndex, editValue);
@@ -23,6 +17,11 @@ export default function TaskComponent(props: TaskCompnentType) {
 
     return (
         <li>
+            <input 
+                type="checkbox" 
+                checked={task.status} 
+                onChange={() => props.statusComplete(arrayIndex)}
+            />
             {showInput ? (
                 <>
                     <input
@@ -35,7 +34,7 @@ export default function TaskComponent(props: TaskCompnentType) {
                 </>
             ):(
                 <>
-                    {task} &nbsp;
+                    {task.status ? <s>{task.name}</s> : <span>{task.name}</span>} &nbsp;
                     <span onClick = {() => setShowInput(true)}><EditIcon/></span>
                 </>
             )} &nbsp;

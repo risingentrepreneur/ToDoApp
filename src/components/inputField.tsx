@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import TaskTitle from "./taskTitle";
-import {TaskObj} from "@/Interfaces/taskObject"
+import {TaskObj, TaskTitleObj, TaskItem} from "@/Interfaces/taskObject"
 
 export default function InputField() {
     const [tasksList, setTasksList] = useState<TaskObj[]>([]);
