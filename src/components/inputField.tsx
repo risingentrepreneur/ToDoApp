@@ -5,7 +5,6 @@ import TaskComponent from "@/components/task";
 
 export default function InputField() {
 
-    const headline = "This Task";
     const [tasksList, setTasksList] = useState<string[]>([]);
     const [inputData, setInputData] = useState("");
 
@@ -17,13 +16,13 @@ export default function InputField() {
 
     return (
         <div>
-            {headline}
             <form onSubmit={addTask}>
                 <input
                     type="text"
                     value={inputData}
-                    placeholder="Enter your txt here"
+                    placeholder="Enter category"
                     onChange={(e) => setInputData(e.target.value)}
+                    className="headline-input"
                 />
                 <button type="submit">Add Task</button>
             </form>
@@ -34,6 +33,9 @@ export default function InputField() {
                     ))
                 }
             </ul>
+            {
+                JSON.stringify(tasksList)
+            }
         </div>
     );
 }
