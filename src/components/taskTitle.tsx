@@ -64,11 +64,6 @@ export default function TaskTitle (props: TaskTitleObj) {
             } : obj ))
     }
 
-    const arrangeTasks = [
-        ...tasks.map((task,index)=> ({task,index})).filter(item => !item.task.status),
-        ...tasks.map((task,index)=> ({task,index})).filter(item => item.task.status)
-    ]
-
 return(
     <>
         <li> {isEditingTitle ? (
@@ -92,7 +87,7 @@ return(
         </li>
 
         <ul>
-            {arrangeTasks.map(({task,index}) => (
+            {tasks.sort((a,b) => Number(a.status) - Number(b.status)).map((task: TaskItem, index) => (
                 <TaskComponent
                     key={index}
                     task={task}

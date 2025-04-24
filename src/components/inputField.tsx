@@ -38,6 +38,7 @@ export default function InputField() {
                 />
                 <button type="submit">Add Title</button>
             </form>
+            {JSON.stringify(tasksList)}
         </div>
     );
 }
