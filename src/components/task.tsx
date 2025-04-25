@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react";
-import { DeleteIcon, EditIcon, CloseIcon} from "./icons";
-import { TaskItem, TaskCompnentType } from "@/Interfaces/taskObject";
+import { DeleteIcon, EditIcon, CloseIcon } from "./icons";
+import {TaskCompnentType} from "@/Interfaces/taskObject";
+import "@/style/todo.scss";
 
 export default function TaskComponent(props: TaskCompnentType) {
 
@@ -16,30 +17,34 @@ export default function TaskComponent(props: TaskCompnentType) {
     };
 
     return (
-        <li>
-            <input 
-                type="checkbox" 
-                checked={task.status} 
+        <li className="task-item">
+            <input
+                type="checkbox"
+                checked={task.status}
                 onChange={() => props.statusComplete(arrayIndex)}
             />
             {showInput ? (
                 <>
                     <input
-                      type = "text"
-                      value = {editValue}
-                      onChange = {(e)=> setEditValue(e.target.value)}
+                        type="text"
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="task-input"
                     />
-                    <button onClick={handleEdit}>Submit</button>
-                    <span onClick={() => setShowInput(false)}><CloseIcon/></span>
+                    <button onClick={handleEdit}>Submit</button> &nbsp;
+                    <span onClick={() => setShowInput(false)}><CloseIcon /></span>
                 </>
-            ):(
+            ) : (
                 <>
-                    {task.status ? <s>{task.name}</s> : <span>{task.name}</span>} &nbsp;
-                    <span onClick = {() => setShowInput(true)}><EditIcon/></span>
+                    {task.status ? (
+                        <s onClick ={() => setShowInput(true)}>{task.name}</s>
+                    ): ( 
+                    <span onClick = {() => setShowInput(true)}>{task.name}</span>
+                )}
                 </>
             )} &nbsp;
-            <span onClick = {() => deleteTask(arrayIndex)}><DeleteIcon/></span>           
-        </li>
-        
+                <span onClick={() => deleteTask(arrayIndex)}><DeleteIcon /></span>
+        </li >
+
     )
 }

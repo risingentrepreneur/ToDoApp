@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import TaskTitle from "./taskTitle";
-import {TaskObj, TaskTitleObj, TaskItem} from "@/Interfaces/taskObject"
+import {TaskObj} from "@/Interfaces/taskObject"
+import "@/style/todo.scss";
 
 export default function InputField() {
     const [tasksList, setTasksList] = useState<TaskObj[]>([]);
@@ -15,7 +16,7 @@ export default function InputField() {
     }
 
     return (
-        <div>
+        <div className="title-section">
             {tasksList.map((taskWithTitle: TaskObj, index: number) => (
                     <ul key={index}>
                         {Object.entries(taskWithTitle).map(([key,tasks], index: number) => (
@@ -33,12 +34,12 @@ export default function InputField() {
                 <input
                     type="text"
                     value={inputTitle}
-                    placeholder="Enter your title here"
+                    placeholder="Enter Title"
                     onChange={(e) => setInputTitle(e.target.value)}
+                    className="heading-input"
                 />
                 <button type="submit">Add Title</button>
             </form>
-            {JSON.stringify(tasksList)}
         </div>
     );
 }

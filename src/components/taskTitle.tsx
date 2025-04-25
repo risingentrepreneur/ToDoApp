@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { EditIcon, DeleteIcon, AddIcon, CloseIcon } from "./icons";
 import TaskComponent from "./task";
-import { TaskObj, TaskTitleObj, TaskItem } from "@/Interfaces/taskObject";
+import {TaskTitleObj, TaskItem } from "@/Interfaces/taskObject";
+import "@/style/todo.scss";
 
 export default function TaskTitle (props: TaskTitleObj) {
     const { title, tasks, setTasksList} = props;
@@ -64,30 +65,37 @@ export default function TaskTitle (props: TaskTitleObj) {
             } : obj ))
     }
 
+    const arrangeTasks = [
+        ...tasks.map((task,index)=> ({task,index})).filter(item => !item.task.status),
+        ...tasks.map((task,index)=> ({task,index})).filter(item => item.task.status)
+    ] 
+
 return(
     <>
-        <li> {isEditingTitle ? (
+        <li className="title-name"> 
+            {isEditingTitle ? (
                 <>
                     <input
                         type="text"
                         value={editTitleInput}
                         onChange={(e) => setEditTitleInput(e.target.value)}
+                        className="heading-input"
                     />
-                        <button onClick={submitEditTitle}>Update</button>
+                        <button onClick={submitEditTitle}>Update</button> &nbsp;
                         <span onClick={() => setIsEditingTitle(false)}><CloseIcon /></span>
                 </>
                 ) : (
                 <>
-                    {title} &nbsp;
-                        <span onClick={() => setIsEditingTitle(true)}><EditIcon /></span> &nbsp;
+                    {/* {title} &nbsp; */}
+                        <span onClick={() => setIsEditingTitle(true)}>{title}</span> &nbsp;
                         <span onClick={() => deleteTitle(title)}><DeleteIcon /></span>
                 </>
                 )
             }
         </li>
 
-        <ul>
-            {tasks.sort((a,b) => Number(a.status) - Number(b.status)).map((task: TaskItem, index) => (
+        <ul className="task-list">
+            {arrangeTasks.map(({task,index}) => (
                 <TaskComponent
                     key={index}
                     task={task}
@@ -97,22 +105,16 @@ return(
                     statusComplete = {(index) => checkboxStatus(title,index)}
                 />
             ))}
-            {
-                showAddTaskInput ? (
-                <>
-                    <input
-                        type="text"
-                        value={taskInput}
-                        onChange={(e) => setTaskInput(e.target.value)}
-                        placeholder={`Add task to ${title}`}
-                    />
-                    <button type="submit" onClick={addTask}>Add task</button>
-                    <span onClick={() => setShowAddTaskInput(false)}><CloseIcon /></span>
-                </>
-                ) : (
-                    <li onClick={() => setShowAddTaskInput(true)}><AddIcon /></li>
-                )
-            }
+            <li className="task-input-row">
+                <input
+                type = "text"
+                value = {taskInput}
+                onChange = {(e) => setTaskInput(e.target.value)}
+                placeholder = {"Add task"}
+                className="task-input"
+                />
+                <button onClick = {addTask}>Submit</button>
+            </li>
         </ul>
     </>
     );
