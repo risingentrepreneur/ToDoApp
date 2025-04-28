@@ -38,7 +38,7 @@ export default function InputField() {
                     onChange={(e) => setInputTitle(e.target.value)}
                     className="heading-input"
                 />
-                <button type="submit">Add Title</button>
+                {/* <button type="submit">Add Title</button> */}
             </form>
         </div>
     );

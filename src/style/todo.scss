@@ -33,6 +33,9 @@ body {
         }
 
         .heading-input {
+            margin: 0;
+            padding: 8px 10px;
+            width: 250px;
             background: none;
             border: none;
             outline: none;
@@ -52,22 +55,30 @@ body {
             align-items: center;
         }
 
-        button {
-            background-color: rgb(254, 145, 163);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            font-size: 14px;
-            border-radius: 6px;
-        }
-
         .title-name {
+            list-style-type: none;
+            padding: 0;
+            padding: 5px 10px;
+            position: relative;
+            font-size: 20px;
             font-weight: bold;
-            font-size: 18px;
-            padding: 10px 16px;
-            margin-bottom: 12px;
+            // padding: 10px 16px;
+            margin: 0;
             background-color: #e0f7fa;
             border-radius: 8px;
+        }
+
+        .title-name .delete-icon {
+            display: none;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .title-name:hover .delete-icon {
+            display: inline;
         }
 
         .task-list {
@@ -77,11 +88,38 @@ body {
         }
 
         .task-item {
+            position: relative;
             padding: 10px 0;
             font-size: 15px;
             display: flex;
             border-bottom: 1px solid #ddd;
+        }
 
+        .task-item .delete-icon {
+            display: none;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .task-item:hover .delete-icon {
+            display: inline;
+        }
+
+        .completed-task {
+            color: grey;
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .task-item input[type="checkbox"] {
+            accent-color: black;
+        }
+
+        .task-item.completed input[type="checkbox"] {
+            accent-color: grey;
         }
     }
 }

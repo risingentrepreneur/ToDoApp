@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DeleteIcon, EditIcon, CloseIcon } from "./icons";
-import {TaskCompnentType} from "@/Interfaces/taskObject";
+import { TaskCompnentType } from "@/Interfaces/taskObject";
 import "@/style/todo.scss";
 
 export default function TaskComponent(props: TaskCompnentType) {
@@ -17,7 +17,7 @@ export default function TaskComponent(props: TaskCompnentType) {
     };
 
     return (
-        <li className="task-item">
+        <li className={`task-item ${task.status ? "completed" : ""}`}>
             <input
                 type="checkbox"
                 checked={task.status}
@@ -29,21 +29,22 @@ export default function TaskComponent(props: TaskCompnentType) {
                         type="text"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' ? handleEdit() : null}
                         className="task-input"
                     />
-                    <button onClick={handleEdit}>Submit</button> &nbsp;
                     <span onClick={() => setShowInput(false)}><CloseIcon /></span>
                 </>
             ) : (
                 <>
-                    {task.status ? (
-                        <s onClick ={() => setShowInput(true)}>{task.name}</s>
-                    ): ( 
-                    <span onClick = {() => setShowInput(true)}>{task.name}</span>
-                )}
+                    <span onClick={() => setShowInput(true)}
+                        className={task.status ? "completed-task" : ""}
+                    >
+                        {task.name}
+                    </span>
                 </>
             )} &nbsp;
-                <span onClick={() => deleteTask(arrayIndex)}><DeleteIcon /></span>
+            <span onClick={() => deleteTask(arrayIndex)}
+                className="delete-icon"><DeleteIcon /></span>
         </li >
 
     )
