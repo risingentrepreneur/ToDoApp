@@ -1,9 +1,10 @@
 
 
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { AddIcon, DeleteIcon, CloseIcon, EditIcon } from "./icons";
 import { TaskObj } from "@/interfaces/taskObject";
+import { Textarea } from "./textarea";
 
 interface TaskWithHeadlineObj {
     headline: string;
@@ -24,12 +25,12 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
     const taskInputRef = useRef<HTMLTextAreaElement | null>(null);
 
 
-    const addTask = () => {
+    const addTask = useCallback(() => {
         addTaskToHeadline(headline, taskInput);
         setTaskInput("");
         setShowAddTaskInput(false);
-        taskInputRef.current?.focus(); // Optionally, refocus the task input
-    }; // addtask function =>Calls the addTaskToHeadline prop function.Clears the input.Hides the input field.
+        // Optionally, refocus the task input
+    }, [headline, taskInput]); // addtask function =>Calls the addTaskToHeadline prop function.Clears the input.Hides the input field.
 
     const saveHeadlineEdit = () => {
         updateHeadline(headlineIndex, headlineInput);
@@ -38,26 +39,41 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
     }; // Function: Save Edited Headline =>Calls updateHeadline to save it.Exits edit mode.
 
 
-    const saveTaskEdit = () => {
+    const saveTaskEdit = useCallback(() => {
         if (editingTaskIndex !== null && taskEditInput) {
             updateTask(headline, editingTaskIndex, taskEditInput);
-            setEditingTaskIndex(null);
+            // setEditingTaskIndex(null);
             setTaskEditInput("");
         }
-    }; //Function: Save Edited Task =>Calls updateTask to update task text.Resets input and closes edit mode.
+    }, [headline, taskEditInput, editingTaskIndex]); //Function: Save Edited Task =>Calls updateTask to update task text.Resets input and closes edit mode.
+
+    useEffect(() => {
+        const timeoutID = setTimeout(() => {
+            saveTaskEdit();
+        }, 300);
+        return () => clearTimeout(timeoutID);
+    }, [saveTaskEdit]);
 
 
-    const addTaskToHeadline = (headline: string, task: string) => {
+    const addTaskToHeadline = useCallback((headline: string, task: string) => {
         setTasksList(prev => (
             prev.map(taskWithHeadline => taskWithHeadline[headline]
                 ? {
                     [headline]: [...taskWithHeadline[headline], { text: task, status: false }]
                 }
                 : taskWithHeadline
-            )
-        )
-        )
-    };
+            )))
+    }, [headline, setTasksList]);
+
+    useEffect(() => {
+        if (taskInput.trim()) {
+            const timeoutID = setTimeout(() => {
+                addTaskToHeadline(headline, taskInput);
+            }, 300);
+            return () => clearTimeout(timeoutID);
+        }
+    }, [taskInput, addTaskToHeadline, headline]);
+
 
     const deleteTask = (headline: string, taskIndex: number) => {
         setTasksList(prev => prev.map(taskWithHeadline => {
@@ -68,12 +84,12 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
         })
         )
     };
-    const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
-        if (element) {
-            element.style.height = "auto";
-            element.style.height = element.scrollHeight + "px"; 
-        }
-    };
+    // const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
+    //     if (element) {
+    //         element.style.height = "auto";
+    //         element.style.height = `${element.scrollHeight}px`;
+    //     }
+    // };
 
 
 
@@ -137,7 +153,9 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
             <div>
                 {editingHeadline ? (
                     <>
-                        <textarea
+                        <Textarea value={headlineInput} setValue={setHeadlineInput} placeholder="add headline..."
+                        />
+                        {/* <textarea
                             value={headlineInput}
                             onChange={(e) => {
                                 setHeadlineInput(e.target.value);
@@ -149,10 +167,7 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
                                     saveHeadlineEdit();
                                 }
                             }}
-
-
-
-                        />
+                        /> */}
                         <button onClick={saveHeadlineEdit}>Save</button>
                         <button onClick={() => {
                             setEditingHeadline(false);
@@ -184,33 +199,16 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
                         />&nbsp;
                         {editingTaskIndex === index ? (
                             <>
-
-                                <textarea
+                                <Textarea
                                     value={taskEditInput}
-                                    onChange={(e) => {
-                                        setTaskEditInput(e.target.value);
-                                        autoResizeTextarea(e.target);
-                                    }}
-                                    style={{ overflow: "hidden", resize: "none" }}
-                                    rows={1}
-
-                                    placeholder="Edit task..."
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            e.preventDefault();
-                                            saveTaskEdit();
-                                        }
-                                    }}
+                                    setValue={setTaskEditInput}
+                                    placeholder="edit task..."
                                 />
-
-
+                                <button onClick={saveTaskEdit}>Save</button> {/* ← This is what’s missing */}
                                 <button onClick={() => {
                                     setEditingTaskIndex(null);
                                     setTaskEditInput("");
                                 }}><CloseIcon /></button>
-
-
-
                             </>
                         ) : (
                             <><span
@@ -233,8 +231,11 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
 
             {/*  Add new task input */}
             {
-                <div>{showAddTaskInput}
-                    <textarea
+                <div>{showAddTaskInput && (
+                    <div>
+
+                        <Textarea value={taskInput} setValue={setTaskInput} placeholder={`Add task to "${headline}"`} />
+                        {/* <textarea
                         className="subtask-inputbox"
                         value={taskInput}
                         
@@ -249,17 +250,19 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
                         }}
                         rows={1}
                         onKeyDown={(e) => e.key === "Enter" && addTask()}
-                    
+                    /> */}
 
-                    />
+                        <button onClick={addTask}>Add</button> {/* ← Add this */}
+                        <button onClick={() => setShowAddTaskInput(false)}><CloseIcon /></button>
+                    </div>
+                )}
 
-
-                    <button onClick={() => setShowAddTaskInput(false)}><CloseIcon /></button>
                 </div>
             }
         </div >
     );
 }
+
 
 
 
