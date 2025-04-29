@@ -1,24 +1,18 @@
-import { useState } from "react";
-import { AddIcon, DeleteIcon,CloseIcon,EditIcon } from "./icons"; 
+
+
+
+import { useState, useRef } from "react";
+import { AddIcon, DeleteIcon, CloseIcon, EditIcon } from "./icons";
 import { TaskObj } from "@/interfaces/taskObject";
 
-  // props interface 
 interface TaskWithHeadlineObj {
     headline: string;
-    tasks: string[];
+    tasks: { text: string; status: boolean }[];
     headlineIndex: number;
-    addTaskToHeadline: (headline: string, task: string) => void;
-    deleteHeadline: (index: number) => void;
-    deleteTask: (headline: string, taskIndex: number) => void;
-    updateHeadline: (index: number, newHeadline: string) => void;
-    updateTask: (headline: string, taskIndex: number, updatedText: string) => void;
-    setTasksList : React.Dispatch<React.SetStateAction<TaskObj[]>>
-}
-
+    setTasksList: React.Dispatch<React.SetStateAction<TaskObj[]>>
+}// props interface 
 export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // component definition 
-    const {headline,tasks,headlineIndex,addTaskToHeadline,deleteHeadline,deleteTask,updateHeadline,updateTask, setTasksList} = props; // destructuring props
-
-
+    const { headline, tasks, headlineIndex, setTasksList } = props; // destructuring props
     const [taskInput, setTaskInput] = useState<string>("");
     const [showAddTaskInput, setShowAddTaskInput] = useState<boolean>(false);
     const [editingHeadline, setEditingHeadline] = useState(false);
@@ -26,369 +20,408 @@ export default function TaskWithHeadline(props: TaskWithHeadlineObj) {   // comp
     const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
     const [taskEditInput, setTaskEditInput] = useState(""); // local state variables
 
+    const headlineInputRef = useRef<HTMLTextAreaElement | null>(null);
+    const taskInputRef = useRef<HTMLTextAreaElement | null>(null);
+
 
     const addTask = () => {
-            addTaskToHeadline(headline, taskInput);
-            setTaskInput("");
-            setShowAddTaskInput(false);
-            }; // addtask function =>Calls the addTaskToHeadline prop function.Clears the input.Hides the input field.
+        addTaskToHeadline(headline, taskInput);
+        setTaskInput("");
+        setShowAddTaskInput(false);
+        taskInputRef.current?.focus(); // Optionally, refocus the task input
+    }; // addtask function =>Calls the addTaskToHeadline prop function.Clears the input.Hides the input field.
 
     const saveHeadlineEdit = () => {
-            updateHeadline(headlineIndex, headlineInput);
-            setEditingHeadline(false); 
+        updateHeadline(headlineIndex, headlineInput);
+        setEditingHeadline(false);
+        headlineInputRef.current?.focus();// Focus back on the headline input after save
     }; // Function: Save Edited Headline =>Calls updateHeadline to save it.Exits edit mode.
+
 
     const saveTaskEdit = () => {
         if (editingTaskIndex !== null && taskEditInput) {
             updateTask(headline, editingTaskIndex, taskEditInput);
-            setEditingTaskIndex(0);
+            setEditingTaskIndex(null);
             setTaskEditInput("");
         }
     }; //Function: Save Edited Task =>Calls updateTask to update task text.Resets input and closes edit mode.
 
+
+    const addTaskToHeadline = (headline: string, task: string) => {
+        setTasksList(prev => (
+            prev.map(taskWithHeadline => taskWithHeadline[headline]
+                ? {
+                    [headline]: [...taskWithHeadline[headline], { text: task, status: false }]
+                }
+                : taskWithHeadline
+            )
+        )
+        )
+    };
+
+    const deleteTask = (headline: string, taskIndex: number) => {
+        setTasksList(prev => prev.map(taskWithHeadline => {
+            if (taskWithHeadline[headline]) {
+                const updatedTasks = taskWithHeadline[headline].filter((_, index1) => index1 !== taskIndex);
+                return { [headline]: updatedTasks };
+            } return taskWithHeadline;
+        })
+        )
+    };
+    const autoResizeTextarea = (element: HTMLTextAreaElement | null) => {
+        if (element) {
+            element.style.height = "auto";
+            element.style.height = element.scrollHeight + "px"; 
+        }
+    };
+
+
+
+    const updateHeadline = (index: number, newHeadline: string) => {
+        setTasksList(prev =>
+            prev.map((item, index1) => {
+                if (index1 === index) {
+                    const oldHeadline = Object.keys(item)[0];
+                    const tasks = item[oldHeadline];
+                    return { [newHeadline]: tasks };
+                }
+                return item;
+            })
+        );
+    };
+
+    const updateTask = (headline: string, taskIndex: number, newText: string) => {
+        setTasksList(prev =>
+            prev.map(taskWithHeadline => {
+                if (taskWithHeadline[headline]) {
+                    const updatedTasks = [...taskWithHeadline[headline]];
+                    // updatedTasks[taskIndex] = newText;
+                    updatedTasks[taskIndex] = {
+                        ...updatedTasks[taskIndex],
+                        text: newText,
+                    };
+
+                    return { [headline]: updatedTasks };
+                }
+                return taskWithHeadline;
+            })
+        );
+    };
+
+    const showCheck = (headline: string, taskIndex: number) => {
+        setTasksList(prev =>
+            prev.map(taskWithHeadline => {
+
+                if (taskWithHeadline[headline]) {
+
+                    const updatedTasks = [...taskWithHeadline[headline]];
+
+                    updatedTasks[taskIndex] = {
+                        ...updatedTasks[taskIndex],
+                        status: !updatedTasks[taskIndex].status
+                    };
+                    return { [headline]: updatedTasks };
+                }
+                return taskWithHeadline;
+            })
+        );
+    };
+
+    const deleteHeadline = (indexToRenmove: number) => {
+        setTasksList(prev => prev.filter((_, index) => index !== indexToRenmove));
+    };
+
     return (
-        <div style={{ marginBottom: "20px" }}>
-            {/* 🟦 Headline row */}
-            <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between"
-            }}>
+        <div className="todo-subcontainer">
+            {/*  Headline row */}
+            <div>
                 {editingHeadline ? (
                     <>
-                        <input
-                            type="text"
+                        <textarea
                             value={headlineInput}
-                            onChange={(e) => setHeadlineInput(e.target.value)}
-                            style={{ flexGrow: 1, marginRight: "10px" }}
+                            onChange={(e) => {
+                                setHeadlineInput(e.target.value);
+                                autoResizeTextarea(e.target);
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    saveHeadlineEdit();
+                                }
+                            }}
+
+
+
                         />
-                        <button onClick={saveHeadlineEdit} >Save</button>
+                        <button onClick={saveHeadlineEdit}>Save</button>
                         <button onClick={() => {
                             setEditingHeadline(false);
                             setHeadlineInput(headline);
                         }}><CloseIcon /></button>
+
                     </>
                 ) : (
                     <>
-                        {/* 🔢 Show headline with number */}
-                        <h3 style={{ margin: 0, flexGrow: 1 }}>
-                            {headlineIndex + 1}. {headline}
-                        </h3>
-                        <div style={{ display: "flex", gap: "8px" }}>
-                            <button onClick={() => setShowAddTaskInput(true)}><AddIcon /></button>
-                            <button onClick={() => deleteHeadline(headlineIndex)}><DeleteIcon /></button>
-                            <button onClick={() => setEditingHeadline(true)}><EditIcon /></button>
+                        <div>
+                            <p>{headlineIndex + 1}. {headline}
+
+                                <button onClick={() => deleteHeadline(headlineIndex)}><DeleteIcon /></button>
+                                <button onClick={() => setEditingHeadline(true)}><EditIcon /></button>
+                            </p>
                         </div>
                     </>
                 )}
             </div>
-
-            {/*  Task list */}
-            <ul style={{ paddingLeft: "20px", marginTop: "10px" }}>
-                {tasks.map((task, index) => (
-                    <li key={index}>
+            {/* Task list */}
+            <ul>
+                {tasks.sort((a, b) => Number(a.status) - Number(b.status)).map((task, index) => (
+                    <ul key={index}>
+                        {/* added a checkbox  */}
+                        <input
+                            type="checkbox"
+                            checked={task.status}
+                            onChange={() => showCheck(headline, index)}
+                        />&nbsp;
                         {editingTaskIndex === index ? (
                             <>
-                                <input
-                                    type="text"
+
+                                <textarea
                                     value={taskEditInput}
-                                    onChange={(e) => setTaskEditInput(e.target.value)}
-                                    style={{ marginRight: "10px" }}
-                                    
+                                    onChange={(e) => {
+                                        setTaskEditInput(e.target.value);
+                                        autoResizeTextarea(e.target);
+                                    }}
+                                    style={{ overflow: "hidden", resize: "none" }}
+                                    rows={1}
+
+                                    placeholder="Edit task..."
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            saveTaskEdit();
+                                        }
+                                    }}
                                 />
-                                <button onClick={saveTaskEdit}>Save</button>
-                                <button onClick={() => setEditingTaskIndex(null)}><CloseIcon /></button>
+
+
+                                <button onClick={() => {
+                                    setEditingTaskIndex(null);
+                                    setTaskEditInput("");
+                                }}><CloseIcon /></button>
+
+
+
                             </>
                         ) : (
-                            <>
-                                {task}
-                                &nbsp;
-                                <button onClick={() => {
+                            <><span
+                                onClick={() => {
                                     setEditingTaskIndex(index);
-                                    setTaskEditInput(task);
-                                }}><EditIcon /></button>
+                                    setTaskEditInput(task.text);
+                                }}
+                            >
+                                {task.text}
+                            </span>
+
                                 <button onClick={() => deleteTask(headline, index)}><DeleteIcon /></button>
                             </>
                         )}
-                    </li>
+                    </ul>
                 ))}
+
+
             </ul>
 
-            {/* ➕ Add new task input */}
-            {showAddTaskInput && (
-                <div style={{ marginTop: "10px" }}>
-                    <input
-                        type="text"
+            {/*  Add new task input */}
+            {
+                <div>{showAddTaskInput}
+                    <textarea
+                        className="subtask-inputbox"
                         value={taskInput}
-                        onChange={(e) => setTaskInput(e.target.value)}
+                        
+                        onChange={(e) => {
+                            setTaskInput(e.target.value);
+                            autoResizeTextarea(e.target);
+                        }}
                         placeholder={`Add task to "${headline}"`}
+                        style={{
+                            overflow: "hidden",
+                            resize: "none",
+                        }}
+                        rows={1}
                         onKeyDown={(e) => e.key === "Enter" && addTask()}
-                        style={{ marginRight: "10px" }}
+                    
+
                     />
-                    <button onClick={addTask}><AddIcon /></button>
+
+
                     <button onClick={() => setShowAddTaskInput(false)}><CloseIcon /></button>
                 </div>
-            )}
-        </div>
+            }
+        </div >
     );
 }
 
 
 
-//     return (
-//         <> 
-//             <li>
-//                 {editingHeadline ? (
-//                     <>
-//                         <input
-//                             type="text"
-//                             value={headlineInput}
-//                             onChange={(e) => setHeadlineInput(e.target.value)}
-//                         />
-//                         <button onClick={saveHeadlineEdit}>Save</button>
-//                         <button onClick={() => {
-//                             setEditingHeadline(false);
-//                             setHeadlineInput(headline);}}><CloseIcon /></button>
-//                     </>
-//                 ) : (
-//                     <>
-//                         {headline}
-//                         &nbsp;
-//                         <span onClick={() => setShowAddTaskInput(true)}><AddIcon /></span>
-//                         &nbsp;
-//                         <button onClick={() => deleteHeadline(headlineIndex)}><DeleteIcon /></button>
-//                         &nbsp;
-//                         <button onClick={() => setEditingHeadline(true)}><EditIcon /></button>
-//                     </>
-//                 )} 
-
-                
-//             </li> 
-//             {/* If editing, it shows an input to change the headline and Save/Cancel buttons.
-//             If not editing, it shows the headline and buttons to add task, delete headline, or edit headline. */}
-
-//             <ul>
-//                 {tasks.map((task, index) => (
-//                     <li key={index}>
-//                         {editingTaskIndex === index ? (
-//                             <>
-//                                 <input
-//                                     type="text"
-//                                     value={taskEditInput}
-//                                     onChange={(e) => setTaskEditInput(e.target.value)}
-//                                 />
-//                                 <button onClick={saveTaskEdit}>Save</button>
-//                                 <button onClick={() => setEditingTaskIndex(null)}><CloseIcon /></button>
-//                             </>
-//                         ) : 
-//                         (
-//                             <>
-//                                 {task}
-//                                 &nbsp;
-//                                 <button onClick={() => {
-//                                     setEditingTaskIndex(index);
-//                                     setTaskEditInput(task);
-//                                 }}><EditIcon /></button>
-//                                 <button onClick={() => deleteTask(headline, index)}><DeleteIcon /></button>
-//                             </>
-//                         )
-//                         }
-//                     </li>
-//                 ))}
-//                 {/* Loops through all tasks.
-//                 If a task is being edited, shows input + save/cancel buttons.
-//                 If not, shows task text + edit/delete buttons. */}
-                
-//                 {/* ➕ Add new task input */}
-//                 {showAddTaskInput && (
-//                    <div style={{ marginTop: "10px" }}>
-//                         <input
-//                             type="text"
-//                             value={taskInput}
-//                             onChange={(e) => setTaskInput(e.target.value)}
-//                             placeholder={`Add task to "${headline}"`}
-//                             onKeyDown={(e) => e.key === "Enter" && addTask()}
-//                         />
-//                         <button onClick={addTask}><AddIcon /></button>
-//                         <button onClick={() => setShowAddTaskInput(false)}><CloseIcon /></button>
-//                         </div>
-//                 )} 
-//                 {/* Only shows if showAddTaskInput is true.
-//                 Allows the user to add a new task and hide the input if canceled.
-//                 Handles Enter key for quick submission. */}
-
-
-//             </ul>
-//         </>
-//     );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // TaskWithHeadline.tsx
-
 // import { useState } from "react";
-// import { AddIcon, DeleteIcon } from "./icons";
+// import { AddIcon, DeleteIcon, CloseIcon, EditIcon } from "./icons";
+// import { TaskObj } from "@/interfaces/taskObject";
 
 // interface TaskWithHeadlineObj {
 //     headline: string;
-//     tasks: string[];
+//     tasks: { text: string; status: boolean }[];
 //     headlineIndex: number;
-//     addTaskToHeadline: (headline: string, task: string) => void;
-//     deleteHeadline: (index: number) => void;
-//     deleteTask: (headline: string, taskIndex: number) => void;
+//     setTasksList: React.Dispatch<React.SetStateAction<TaskObj[]>>;
 // }
 
 // export default function TaskWithHeadline(props: TaskWithHeadlineObj) {
-//     const {
-//         headline,
-//         tasks,
-//         headlineIndex,
-//         addTaskToHeadline,
-//         deleteHeadline,
-//         deleteTask,
-//     } = props;
+//     const { headline, tasks, headlineIndex, setTasksList } = props;
 
-//     const [taskInput, setTaskInput] = useState<string>("");
-//     const [showAddTaskInput, setShowAddTaskInput] = useState<boolean>(false);
+//     const [taskInput, setTaskInput] = useState("");
+//     const [showAddTaskInput, setShowAddTaskInput] = useState(false);
+//     const [editingHeadline, setEditingHeadline] = useState(false);
+//     const [headlineInput, setHeadlineInput] = useState(headline);
+//     const [editingTaskIndex, setEditingTaskIndex] = useState<number | null>(null);
+//     const [taskEditInput, setTaskEditInput] = useState("");
+
+//     const updateTasksList = (updatedTasks: { text: string; status: boolean }[]) => {
+//         setTasksList(prev =>
+//             prev.map((taskWithHeadline, index) => {
+//                 if (index === headlineIndex) {
+//                     return { [headline]: updatedTasks };
+//                 }
+//                 return taskWithHeadline;
+//             })
+//         );
+//     };
 
 //     const addTask = () => {
-//         if (taskInput.trim()) {
-//             addTaskToHeadline(headline, taskInput.trim());
-//             setTaskInput("");
-//             setShowAddTaskInput(false);
+//         if (!taskInput.trim()) return;
+//         updateTasksList([...tasks, { text: taskInput.trim(), status: false }]);
+//         setTaskInput("");
+//         setShowAddTaskInput(false);
+//     };
+
+//     const saveHeadlineEdit = () => {
+//         setTasksList(prev =>
+//             prev.map((taskWithHeadline, index) => {
+//                 if (index === headlineIndex) {
+//                     const oldHeadline = Object.keys(taskWithHeadline)[0];
+//                     const currentTasks = taskWithHeadline[oldHeadline];
+//                     return { [headlineInput]: currentTasks };
+//                 }
+//                 return taskWithHeadline;
+//             })
+//         );
+//         setEditingHeadline(false);
+//     };
+
+//     const saveTaskEdit = () => {
+//         if (editingTaskIndex !== null && taskEditInput.trim()) {
+//             const updatedTasks = [...tasks];
+//             updatedTasks[editingTaskIndex] = {
+//                 ...updatedTasks[editingTaskIndex],
+//                 text: taskEditInput.trim(),
+//             };
+//             updateTasksList(updatedTasks);
+//             setEditingTaskIndex(null);
+//             setTaskEditInput("");
 //         }
 //     };
 
+//     const deleteTask = (taskIndex: number) => {
+//         const updatedTasks = tasks.filter((_, index) => index !== taskIndex);
+//         updateTasksList(updatedTasks);
+//     };
+
+//     const toggleCheck = (taskIndex: number) => {
+//         const updatedTasks = [...tasks];
+//         updatedTasks[taskIndex].status = !updatedTasks[taskIndex].status;
+//         updateTasksList(updatedTasks);
+//     };
+
+//     const deleteHeadline = () => {
+//         setTasksList(prev => prev.filter((_, index) => index !== headlineIndex));
+//     };
+
 //     return (
-//         <>
-//             <li>
-//                 <strong>{headline}</strong>
-//                 &nbsp;
-//                 <span onClick={() => setShowAddTaskInput(true)}><AddIcon /></span>
-//                 &nbsp;
-//                 <span onClick={() => deleteHeadline(headlineIndex)}><DeleteIcon /></span>
-//             </li>
+//         <div className="todo-subcontainer">
+//             <div>
+//                 {editingHeadline ? (
+//                     <>
+//                         <textarea
+//                             value={headlineInput}
+//                             onChange={(e) => setHeadlineInput(e.target.value)}
+//                             onKeyDown={(e) => {
+//                                 if (e.key === "Enter") {
+//                                     e.preventDefault();
+//                                     saveHeadlineEdit();
+//                                 }
+//                             }}
+//                         />
+//                         <button onClick={saveHeadlineEdit}>Save</button>
+//                         <button onClick={() => setEditingHeadline(false)}><CloseIcon /></button>
+//                     </>
+//                 ) : (
+//                     <p>
+//                         {headlineIndex + 1}. {headline}
+//                         <button onClick={deleteHeadline}><DeleteIcon /></button>
+//                         <button onClick={() => setEditingHeadline(true)}><EditIcon /></button>
+//                     </p>
+//                 )}
+//             </div>
+
 //             <ul>
 //                 {tasks.map((task, index) => (
 //                     <li key={index}>
-//                         {task}
-//                         &nbsp;
-//                         <button onClick={() => deleteTask(headline, index)}>Delete</button>
+//                         <input
+//                             type="checkbox"
+//                             checked={task.status}
+//                             onChange={() => toggleCheck(index)}
+//                         />
+//                         {editingTaskIndex === index ? (
+//                             <>
+//                                 <textarea
+//                                     value={taskEditInput}
+//                                     onChange={(e) => setTaskEditInput(e.target.value)}
+//                                     placeholder="Edit task..."
+//                                     onKeyDown={(e) => {
+//                                         if (e.key === "Enter") {
+//                                             e.preventDefault();
+//                                             saveTaskEdit();
+//                                         }
+//                                     }}
+//                                 />
+//                                 <button onClick={() => setEditingTaskIndex(null)}><CloseIcon /></button>
+//                             </>
+//                         ) : (
+//                             <>
+//                                 <span onClick={() => {
+//                                     setEditingTaskIndex(index);
+//                                     setTaskEditInput(task.text);
+//                                 }}>
+//                                     {task.text}
+//                                 </span>
+//                                 <button onClick={() => deleteTask(index)}><DeleteIcon /></button>
+//                             </>
+//                         )}
 //                     </li>
 //                 ))}
-//                 {showAddTaskInput && (
-//                     <>
-//                         <input
-//                             type="text"
-//                             value={taskInput}
-//                             onChange={(e) => setTaskInput(e.target.value)}
-//                             placeholder={`Add task to "${headline}"`}
-//                             onKeyDown={(e) => e.key === "Enter" && addTask()}
-//                         />
-//                         <button onClick={addTask}>Add Task</button>
-//                         <button onClick={() => setShowAddTaskInput(false)}>Cancel</button>
-//                     </>
-//                 )}
 //             </ul>
-//         </>
+
+//             {showAddTaskInput && (
+//                 <>
+//                     <textarea
+//                         value={taskInput}
+//                         onChange={(e) => setTaskInput(e.target.value)}
+//                         placeholder={`Add task to "${headline}"`}
+//                         onKeyDown={(e) => e.key === "Enter" && addTask()}
+//                     />
+//                     <button onClick={() => setShowAddTaskInput(false)}><CloseIcon /></button>
+//                 </>
+//             )}
+
+//             <button onClick={() => setShowAddTaskInput(true)}>Add Task</button>
+//         </div>
 //     );
 // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useState } from "react";
-// import { AddIcon } from "./icons";
-
-// interface TaskWithHeadlineObj {
-//     headline: string,
-//     tasks: string[],
-//     addTaskToHeadline: (headline: string, task: string) => void
-// }
-
-// export default function TaskWithHeadline(props: TaskWithHeadlineObj) {
-
-//     const { headline, tasks, addTaskToHeadline } = props;
-//     const [taskInput, setTaskInput] = useState<string>("");
-//     const [showAddTaskInput, setShowAddTaskInput] = useState<boolean>(false);
-
-//     const addTask = () => {
-//         addTaskToHeadline(headline, taskInput);
-//         setTaskInput("");
-//         setShowAddTaskInput(false);
-//     }
-
-//     return (
-//         <>
-//             <li>{headline} &nbsp; <span onClick={() => setShowAddTaskInput(true)}> <AddIcon /></span> </li>
-//             <ul>
-//                 {
-//                     tasks.length > 0 ? tasks.map((task, index) => (
-//                         <li key={index}>{task}</li>
-//                     )) : ""
-//                 }
-//                 {
-//                     showAddTaskInput ? (
-//                         <>
-//                             <input
-//                                 type="text"
-//                                 value={taskInput}
-//                                 onChange={(e) => setTaskInput(e.target.value)}
-//                                 placeholder={`Add task to ${headline}`}
-//                             />
-//                             <button type="submit" onClick={addTask}>Add task</button> <br /><br /><br />
-//                         </>
-//                     ) : ""
-//                 }
-//             </ul>
-//         </>
-//     )
-// }
-
-
