@@ -1,5 +1,5 @@
-import { HtmlContext } from "next/dist/server/route-modules/pages/vendored/contexts/entrypoints";
-import { useEffect, useRef } from "react";
+
+import {  useRef } from "react";
 
 interface TextareaProps{
     value:string;
@@ -12,15 +12,15 @@ export function Textarea(props :TextareaProps){
     const {value, setValue, placeholder }=props;
     const textareaRef=useRef<HTMLTextAreaElement>(null);
     
-    useEffect(()=>{
-        if(textareaRef.current){
-            textareaRef.current.style.height="auto"
-            textareaRef.current.style.height=`${textareaRef.current.scrollHeight}px`
-        }
-    },[value]);
+    // useEffect(()=>{
+    //     if(textareaRef.current){
+    //         textareaRef.current.style.height="auto"
+    //         textareaRef.current.style.height=`${textareaRef.current.scrollHeight}px`
+    //     }
+    // },[value]);
 
     return <textarea
-    ref={textareaRef}
+        ref={textareaRef}
         value={value}
         rows={1}
         onChange={(e)=>setValue(e.target.value)}
