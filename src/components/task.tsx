@@ -1,20 +1,29 @@
 "use client"
 
-import { useState } from "react";
-import { DeleteIcon, EditIcon, CloseIcon } from "./icons";
+import { useCallback, useEffect, useState } from "react";
+import { DeleteIcon } from "./icons";
 import { TaskCompnentType } from "@/Interfaces/taskObject";
 import "@/style/todo.scss";
+import { TextArea } from "./textArea";
 
 export default function TaskComponent(props: TaskCompnentType) {
-
-    const { task, arrayIndex, deleteTask, editTask } = props;
-    const [showInput, setShowInput] = useState<boolean>(false);
+    const { task, arrayIndex, deleteTask, editTask, focus = false } = props;
     const [editValue, setEditValue] = useState<string>(task.name);
 
-    const handleEdit = () => {
+    const handleEdit = useCallback(() => {
+        if (editValue === "") {
+            deleteTask(arrayIndex);
+            return;
+        }
         editTask(arrayIndex, editValue);
-        setShowInput(false);
-    };
+    }, [editValue, arrayIndex, editTask, deleteTask]);
+
+    useEffect(() => {
+        const timeoutID = setTimeout(() => {
+            handleEdit();
+        }, 300);
+        return () => clearTimeout(timeoutID);
+    }, [handleEdit]);
 
     return (
         <li className={`task-item ${task.status ? "completed" : ""}`}>
@@ -23,29 +32,13 @@ export default function TaskComponent(props: TaskCompnentType) {
                 checked={task.status}
                 onChange={() => props.statusComplete(arrayIndex)}
             />
-            {showInput ? (
-                <>
-                    <input
-                        type="text"
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' ? handleEdit() : null}
-                        className="task-input"
-                    />
-                    <span onClick={() => setShowInput(false)}><CloseIcon /></span>
-                </>
-            ) : (
-                <>
-                    <span onClick={() => setShowInput(true)}
-                        className={task.status ? "completed-task" : ""}
-                    >
-                        {task.name}
-                    </span>
-                </>
-            )} &nbsp;
+            <TextArea
+                value={editValue}
+                setValue={setEditValue}
+                focus={focus}
+                placeholder="Enter task.." /> &nbsp;
             <span onClick={() => deleteTask(arrayIndex)}
                 className="delete-icon"><DeleteIcon /></span>
         </li >
-
     )
 }

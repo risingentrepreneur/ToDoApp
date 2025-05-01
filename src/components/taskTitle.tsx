@@ -1,23 +1,33 @@
-import React, { useState } from "react";
-import { EditIcon, DeleteIcon, AddIcon, CloseIcon } from "./icons";
+import React, { useCallback, useEffect, useState } from "react";
+import { DeleteIcon, CloseIcon } from "./icons";
 import TaskComponent from "./task";
 import { TaskTitleObj, TaskItem } from "@/Interfaces/taskObject";
 import "@/style/todo.scss";
+import { TextArea } from "./textArea";
 
 export default function TaskTitle(props: TaskTitleObj) {
     const { title, tasks, setTasksList } = props;
+    const [currentTitle, setCurrentTItle] = useState<string>(title);
     const [taskInput, setTaskInput] = useState<string>("");
-    const [showAddTaskInput, setShowAddTaskInput] = useState<boolean>(false);
     const [editTitleInput, setEditTitleInput] = useState<string>(title);
     const [isEditingTitle, setIsEditingTitle] = useState<boolean>(false);
 
-    const addTaskToTitle = (title: string, task: string) => {
-        const newTask: TaskItem = { name: task, status: false }
-        setTasksList((prev) => prev.map((obj) =>
-            obj[title] ? { [title]: [...obj[title], newTask] } : obj
-        )
-        )
-    }
+    const addTaskToTitle = useCallback(() => {
+        if (taskInput != "") {
+            const newTask: TaskItem = { name: taskInput, status: false }
+            setTasksList((prev) => prev.map((obj) =>
+                obj[title] ? { [title]: [...obj[title], newTask] } : obj
+            ))
+            setTaskInput("");
+        }
+    }, [setTasksList, taskInput, title])
+
+    useEffect(() => {
+        const timeoutID = setTimeout(() => {
+            addTaskToTitle();
+        }, 100);
+        return () => clearTimeout(timeoutID);
+    }, [addTaskToTitle]);
 
     const deleteTitle = (title: string) => {
         setTasksList((prev) => prev.filter(obj => !obj[title]));
@@ -27,6 +37,7 @@ export default function TaskTitle(props: TaskTitleObj) {
         setTasksList(prev => prev.map(obj =>
             obj[title] ? { [newTitle]: obj[title] } : obj
         ))
+        setCurrentTItle(newTitle);
     }
 
     const deleteTaskFromTitle = (title: string, index: number) => {
@@ -35,26 +46,16 @@ export default function TaskTitle(props: TaskTitleObj) {
                 [title]: obj[title].filter((task: TaskItem, taskIndex: number) =>
                     taskIndex !== index)
             } : obj
-        )
-        )
+        ))
     }
 
     const editTaskInTitle = (title: string, index: number, taskName: string) => {
-        const newTask: TaskItem = { name: taskName, status: false }
         setTasksList(prev => prev.map(obj =>
             obj[title] ? {
                 [title]: obj[title].map((task: TaskItem, taskIndex: number) =>
-                    (taskIndex === index ? newTask : task))
-            }
-                : obj
-        )
-        )
-    }
-
-    const addTask = () => {
-        addTaskToTitle(title, taskInput);
-        setTaskInput("");
-        setShowAddTaskInput(false);
+                    (taskIndex === index ? { ...task, name: taskName } : task))
+            } : obj
+        ))
     }
 
     const submitEditTitle = () => {
@@ -62,9 +63,9 @@ export default function TaskTitle(props: TaskTitleObj) {
         setIsEditingTitle(false);
     }
 
-    const checkboxStatus = (title: string, index: number) => {
+    const checkboxStatus = (index: number) => {
         setTasksList(prev => prev.map(obj => obj[title] ? {
-            [title]: obj[title].map((task, taskIndex) => taskIndex === index ?
+            [currentTitle]: obj[currentTitle].map((task, taskIndex) => taskIndex === index ?
                 { ...task, status: !task.status } : task)
         } : obj))
     }
@@ -94,33 +95,33 @@ export default function TaskTitle(props: TaskTitleObj) {
                         <span onClick={() => deleteTitle(title)}
                             className="delete-icon"><DeleteIcon /></span>
                     </>
-                )
-                }
+                )}
             </div>
-
             <ul className="task-list">
-                {arrangeTasks.map(({ task, index }) => (
-                    <TaskComponent
-                        key={index}
-                        task={task}
-                        arrayIndex={index}
-                        deleteTask={(index) => deleteTaskFromTitle(title, index)}
-                        editTask={(index, newTask) => editTaskInTitle(title, index, newTask)}
-                        statusComplete={(index) => checkboxStatus(title, index)}
-                    />
-                ))}
-                <form onSubmit={(e) => {
-                    e.preventDefault();
-                    addTask();
-                }}>
-                    <input
-                        type="text"
-                        value={taskInput}
-                        onChange={(e) => setTaskInput(e.target.value)}
-                        placeholder="Add task"
-                        className="task-input"
-                    />
-                </form>
+                {arrangeTasks.map(({ task, index }) => {
+                    const focus = index === tasks.length - 1 ? true : false;
+                    return (
+                        <TaskComponent
+                            key={index}
+                            task={task}
+                            arrayIndex={index}
+                            deleteTask={(index) => deleteTaskFromTitle(title, index)}
+                            editTask={(index, newTask) => editTaskInTitle(title, index, newTask)}
+                            statusComplete={(index) => checkboxStatus(index)}
+                            focus={focus}
+                        />
+                    )
+                })}
+                <li className="task-item">
+                    <input type="checkbox" disabled />
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        addTaskToTitle();
+                    }}
+                        className="task-input-area">
+                        <TextArea value={taskInput} setValue={setTaskInput} placeholder="Add task.." />
+                    </form>
+                </li>
             </ul>
         </>
     );

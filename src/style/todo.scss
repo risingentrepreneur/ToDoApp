@@ -43,18 +43,6 @@ body {
             font-size: 14px;
         }
 
-        .task-input {
-            background: none;
-            border: none;
-            outline: none;
-            font-size: 14px;
-        }
-
-        .task-input-row {
-            display: flex;
-            align-items: center;
-        }
-
         .title-name {
             list-style-type: none;
             padding: 0;
@@ -62,7 +50,7 @@ body {
             position: relative;
             font-size: 20px;
             font-weight: bold;
-            // padding: 10px 16px;
+            padding: 5px 14px;
             margin: 0;
             background-color: #e0f7fa;
             border-radius: 8px;
@@ -83,14 +71,14 @@ body {
 
         .task-list {
             list-style: none;
-            padding-left: 16px;
+            padding-left: 14px;
             margin-top: 10px;
         }
 
         .task-item {
             position: relative;
-            padding: 10px 0;
-            font-size: 15px;
+            padding: 5px 0;
+            font-size: 14px;
             display: flex;
             border-bottom: 1px solid #ddd;
         }
@@ -108,18 +96,26 @@ body {
             display: inline;
         }
 
-        .completed-task {
-            color: grey;
-            opacity: 0.6;
-            text-decoration: line-through;
-        }
-
         .task-item input[type="checkbox"] {
             accent-color: black;
         }
 
-        .task-item.completed input[type="checkbox"] {
+        .task-item.completed {
+            text-decoration: line-through;
             accent-color: grey;
+            opacity: 0.6;
+        }
+
+        .task-input-area{
+            display: flex;
         }
     }
+}
+
+textarea {
+    border:none;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    font-size: 16px;
 }
