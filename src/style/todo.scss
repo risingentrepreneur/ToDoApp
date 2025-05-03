@@ -1,0 +1,121 @@
+body {
+    height: 100vh;
+    width: 100%;
+    background-color: antiquewhite;
+    margin: 0;
+    padding: 0;
+}
+
+.to-do-app {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .to-do-section {
+        height: 100%;
+        width: 50%;
+        padding: 30px 50px;
+        background-color: aliceblue;
+
+        .title-section {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .to-do-heading {
+            text-align: center;
+        }
+
+        .heading-input {
+            margin: 0;
+            padding: 8px 10px;
+            width: 250px;
+            background: none;
+            border: none;
+            outline: none;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .title-name {
+            list-style-type: none;
+            padding: 0;
+            padding: 5px 10px;
+            position: relative;
+            font-size: 20px;
+            font-weight: bold;
+            padding: 5px 14px;
+            margin: 0;
+            background-color: #e0f7fa;
+            border-radius: 8px;
+        }
+
+        .title-name .delete-icon {
+            display: none;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .title-name:hover .delete-icon {
+            display: inline;
+        }
+
+        .task-list {
+            list-style: none;
+            padding-left: 14px;
+            margin-top: 10px;
+        }
+
+        .task-item {
+            position: relative;
+            padding: 5px 0;
+            font-size: 14px;
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .task-item .delete-icon {
+            display: none;
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+        }
+
+        .task-item:hover .delete-icon {
+            display: inline;
+        }
+
+        .task-item input[type="checkbox"] {
+            accent-color: black;
+        }
+
+        .task-item.completed {
+            text-decoration: line-through;
+            accent-color: grey;
+            opacity: 0.6;
+        }
+
+        .task-input-area{
+            display: flex;
+        }
+    }
+}
+
+textarea {
+    border:none;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    font-size: 16px;
+}
